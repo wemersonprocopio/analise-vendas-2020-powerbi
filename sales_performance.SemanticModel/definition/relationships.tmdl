@@ -1,0 +1,4 @@
+relationship 'vendas_Data da Venda_dCalendario_Data'
+	fromColumn: vendas.'Data da Venda'
+	toColumn: Calendario.Data
+

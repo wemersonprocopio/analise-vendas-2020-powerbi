@@ -1,0 +1,32 @@
+/// Tabela que guarda as medidas do relatório.
+table Medidas
+	lineageTag: 464f0c10-d6cc-488a-aef0-7476acbef5cd
+
+	/// Soma do faturamento das vendas.
+	measure 'Faturamento Total' = SUM ( vendas[Faturamento] )
+		formatString: "R$" #,0.00;-"R$" #,0.00;"R$" #,0.00
+		lineageTag: 9fc66a07-ffa5-48ae-8e95-d63c0e02a470
+
+	/// Total de unidades vendidas.
+	measure 'Quantidade Vendida' = SUM ( vendas[Qtd. Vendida] )
+		formatString: #,0
+		lineageTag: d0068d5e-1091-4106-8392-97dac1d91720
+
+	/// Produto com maior quantidade vendida no contexto atual.
+	measure 'Produto Mais Vendido' =
+			VAR _top =
+			    TOPN ( 1, VALUES ( vendas[Produto] ), [Quantidade Vendida], DESC )
+			RETURN
+			    CONCATENATEX ( _top, vendas[Produto], ", " )
+		lineageTag: dc47ef6b-f056-40a8-8864-086992e85808
+
+	column x
+		isHidden
+		lineageTag: 7e6839c6-5cfa-480a-99e3-ed0468c89f6c
+		isNameInferred
+		sourceColumn: [x]
+
+	partition Medidas = calculated
+		mode: import
+		source = ROW ( "x", BLANK () )
+

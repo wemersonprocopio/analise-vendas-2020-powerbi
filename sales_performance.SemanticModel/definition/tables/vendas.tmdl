@@ -1,0 +1,109 @@
+table vendas
+	lineageTag: 7f214975-e9a8-4954-ae7c-883c16b1938c
+
+	column 'Data da Venda'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 088bde26-ccfc-4816-85ff-61c4d405c26f
+		summarizeBy: none
+		sourceColumn: Data da Venda
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Produto
+		dataType: string
+		lineageTag: 5374a10e-f6db-4962-80b5-673a540f0732
+		summarizeBy: none
+		sourceColumn: Produto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Preco Unitario'
+		dataType: double
+		lineageTag: f80a1f42-fb2a-487b-8262-a98295b58aaf
+		summarizeBy: sum
+		sourceColumn: Preco Unitario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Qtd. Vendida'
+		dataType: int64
+		formatString: 0
+		lineageTag: 95890171-1cea-4b89-8a5b-6e10dc36547b
+		summarizeBy: sum
+		sourceColumn: Qtd. Vendida
+
+		annotation SummarizationSetBy = Automatic
+
+	column Faturamento
+		dataType: double
+		lineageTag: 7c8679aa-37f2-4681-a0a9-89b0c4a7e98f
+		summarizeBy: sum
+		sourceColumn: Faturamento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Marca
+		dataType: string
+		lineageTag: d56b4db1-91a2-4a50-bea9-c67d48463cdf
+		summarizeBy: none
+		sourceColumn: Marca
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cliente
+		dataType: string
+		lineageTag: d429f47b-9e1d-4ab5-9f03-c24f930ca1c5
+		summarizeBy: none
+		sourceColumn: Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Região Destino'
+		dataType: string
+		lineageTag: 95d17952-7508-42a7-9aca-428c771e46c7
+		summarizeBy: none
+		sourceColumn: Região Destino
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Nome do estado a partir da Região Destino, para o mapa.
+	column Estado =
+			VAR _uf = TRIM ( RIGHT ( vendas[Região Destino], 2 ) )
+			RETURN
+			    SWITCH ( _uf,
+			        "SP", "São Paulo", "RJ", "Rio de Janeiro", "ES", "Espírito Santo", "MG", "Minas Gerais",
+			        "BA", "Bahia", "MA", "Maranhão", "AM", "Amazonas", "PR", "Paraná", "SC", "Santa Catarina",
+			        "RS", "Rio Grande do Sul", "PE", "Pernambuco", "CE", "Ceará", "GO", "Goiás", "DF", "Distrito Federal",
+			        _uf )
+		lineageTag: 1dce2dd6-0440-456a-a177-a444a5607873
+		dataCategory: StateOrProvince
+		summarizeBy: none
+
+	/// País de destino, para o mapa.
+	column País = "Brasil"
+		lineageTag: 1254f080-6c70-489a-8feb-0c9b2de451aa
+		dataCategory: Country
+		summarizeBy: none
+
+	partition vendas = m
+		mode: import
+		source =
+				let
+				  Origem = Excel.Workbook(File.Contents("C:\Users\Acer\OneDrive\claude\12_powerbi\6_sales_performance\vendas.xlsx"), null, true),
+				  #"Navegação 1" = Origem{[Item = "Planilha1", Kind = "Sheet"]}[Data],
+				  #"Cabeçalhos promovidos" = Table.PromoteHeaders(#"Navegação 1", [PromoteAllScalars = true]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(#"Cabeçalhos promovidos", {{"Data da Venda", type date}, {"Produto", type text}, {"Preco Unitario", type number}, {"Qtd. Vendida", Int64.Type}, {"Faturamento", type number}, {"Marca", type text}, {"Cliente", type text}, {"Região Destino", type text}}),
+				  #"Texto aparado" = Table.TransformColumns(#"Tipo de coluna alterado", {{"Marca", Text.Trim, type text}}),
+				  #"Duplicatas removidas" = Table.Distinct(#"Texto aparado")
+				in
+				  #"Duplicatas removidas"
+
+	annotation PBI_ResultType = Table
+

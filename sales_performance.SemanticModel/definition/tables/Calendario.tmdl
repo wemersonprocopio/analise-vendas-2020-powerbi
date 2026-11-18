@@ -1,0 +1,86 @@
+/// Tabela calendário cobrindo os anos completos da base de vendas.
+table Calendario
+	lineageTag: 90d917e1-06ef-4012-a226-41f9129191bd
+	dataCategory: Time
+
+	column Data
+		isUnique
+		formatString: dd/mm/yyyy
+		lineageTag: 07dde215-df3f-4627-b6bf-271000f80632
+		summarizeBy: none
+		sourceColumn: [Date]
+
+	column Ano
+		formatString: 0
+		lineageTag: 81f0a26e-92e0-42c0-8c37-4b5edf43639f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Ano]
+
+	column 'Mês Nº'
+		isHidden
+		lineageTag: 561e6616-6283-4b01-bc6b-9de78f432eba
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mês Nº]
+
+	column Mês
+		lineageTag: 6f05f4b3-a8f0-4a0a-8df4-e23c78fadd07
+		isNameInferred
+		sourceColumn: [Mês]
+		sortByColumn: 'Mês Nº'
+
+	column 'Mês Abrev'
+		lineageTag: 8afb73a5-51e8-4f63-8f58-1355d24db947
+		isNameInferred
+		sourceColumn: [Mês Abrev]
+		sortByColumn: 'Mês Nº'
+
+	column Ano-Mês
+		lineageTag: fe1e8ede-ad9f-4a6c-93c3-9f3ddf6706ea
+		isNameInferred
+		sourceColumn: [Ano-Mês]
+
+	column Trimestre
+		lineageTag: e2f43d7b-b1ba-40e2-8afb-c0d6e0c55108
+		isNameInferred
+		sourceColumn: [Trimestre]
+
+	column Dia
+		lineageTag: 07e6ad0a-9cf8-4df4-ac89-a70d5061eaa3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Dia]
+
+	column 'Dia da Semana Nº'
+		isHidden
+		lineageTag: 44793bb9-31db-42fe-9ef6-cda13512ed07
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Dia da Semana Nº]
+
+	column 'Dia da Semana'
+		lineageTag: 86739264-b744-4d82-bee9-25754ba183ae
+		isNameInferred
+		sourceColumn: [Dia da Semana]
+		sortByColumn: 'Dia da Semana Nº'
+
+	partition dCalendario = calculated
+		mode: import
+		source =
+				VAR _ini = DATE ( YEAR ( MIN ( vendas[Data da Venda] ) ), 1, 1 )
+				VAR _fim = DATE ( YEAR ( MAX ( vendas[Data da Venda] ) ), 12, 31 )
+				RETURN
+				ADDCOLUMNS (
+				    CALENDAR ( _ini, _fim ),
+				    "Ano", YEAR ( [Date] ),
+				    "Mês Nº", MONTH ( [Date] ),
+				    "Mês", FORMAT ( [Date], "mmmm" ),
+				    "Mês Abrev", FORMAT ( [Date], "mmm" ),
+				    "Ano-Mês", FORMAT ( [Date], "yyyy-mm" ),
+				    "Trimestre", "T" & QUARTER ( [Date] ),
+				    "Dia", DAY ( [Date] ),
+				    "Dia da Semana Nº", WEEKDAY ( [Date], 2 ),
+				    "Dia da Semana", FORMAT ( [Date], "dddd" )
+				)
+

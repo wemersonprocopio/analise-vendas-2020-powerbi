@@ -1,0 +1,13 @@
+# Arquivos locais do Power BI Desktop (cache e preferências da máquina)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# Base de dados de exercício (material de terceiros, não redistribuído)
+vendas.xlsx
+
+# Rascunhos pessoais de divulgação
+post_linkedin.txt
+linkedin_projeto.txt
+
+# Arquivos temporários do Office
+~$*
